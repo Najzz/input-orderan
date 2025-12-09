@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>TECI ASOY - Order System</title>
+
+<style>
+/* === BACKGROUND RGB === */
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 15px;
+  background-size: 300% 300%;
+  animation: rgbBackground 10s infinite alternate ease-in-out;
+}
+@keyframes rgbBackground {
+  0% { background: linear-gradient(45deg,#ff0040,#ff8c00,#ffe600); }
+  50% { background: linear-gradient(45deg,#00ff6a,#00c8ff,#9b00ff); }
+  100% { background: linear-gradient(45deg,#ff0040,#9b00ff,#00c8ff); }
+}
+
+/* === LOGO & HEADER === */
+.logo-container {
+  text-align: center;
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+.logo-container img {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  filter: drop-shadow(0px 3px 6px rgba(0,0,0,0.3));
+}
+.store-name {
+  font-size: 35px;
+  font-weight: 800;
+  margin-top: 10px;
+  color: #ffffff;
+  text-shadow: 0px 2px 8px rgba(0,0,0,0.4);
+}
+
+/* === POPUP STRUK === */
+#strukPopup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 99999;
+  justify-content: center;
+  align-items: center;
+}
+.struk-box {
+  background: white;
+  width: 90%;
+  max-width: 420px;
+  padding: 20px;
+  border-radius: 15px;
+  overflow-y: auto;
+  max-height: 90%;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(0,0,0,0.4);
+}
+.struk-title {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.struk-logo {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 10px;
+}
+.struk-text {
+  text-align: left;
+  font-size: 16px;
+  white-space: pre-line;
+}
+.struk-buttons {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+.btn-struk {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+.btn-wa { background: #25D366; }
+.btn-close { background: #d62828; }
+
+/* === LOADING OVERLAY === */
+#loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.65);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+  text-align: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+/* === CONTAINER === */
+.container, .orders-container {
+  max-width: 800px;
+  margin: auto;
+  background: rgba(255,255,255,0.85);
+  padding: 25px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+
+/* === FORM CARD A === */
+.form-card {
+  background: #ffffff;
+  padding: 18px;
+  border-radius: 16px;
+  margin-bottom: 18px;
+  border: 2px solid #e6e6e6;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.form-card label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.form-card input,
+.form-card textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid #ddd;
+  background: #f9f9f9;
+  transition: .2s;
+}
+.form-card input:focus,
+.form-card textarea:focus {
+  background: #fff;
+  border-color: #00c8ff;
+  box-shadow: 0 0 8px rgba(0,200,255,0.3);
+}
+
+/* === PRODUCT CARD === */
+.product-card {
+  background: #ffffff;
+  padding: 18px;
+  border-radius: 16px;
+  margin-bottom: 18px;
+  border: 2px solid #e6e6e6;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.product-title {
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.product-row label {
+  font-weight: bold;
+}
+
+.product-row input,
+.product-row select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 12px;
+  border: 2px solid #ddd;
+  background: #fafafa;
+  margin-bottom: 10px;
+}
+
+/* === BUTTON === */
+.btn {
+  padding: 10px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+.btn-submit {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(90deg,#ff0040,#ffe600,#00ff6a,#00c8ff,#9b00ff);
+  background-size: 400%;
+  animation: rgbBtn 5s infinite linear;
+}
+@keyframes rgbBtn { 0%{background-position:0%;}100%{background-position:400%;}}
+
+.btn-done { background:#28a745; }
+.btn-edit { background:#f0a500; }
+.btn-delete{ background:#d62828; }
+
+/* HISTORY */
+.order-item {
+  background:#ffffffdd;
+  padding:15px;
+  border-radius:12px;
+  border-left:5px solid #00c8ff;
+  margin-bottom:12px;
+}
+.order-done {
+  background:#c9ffd0 !important;
+  text-decoration: line-through;
+  border-left-color:#28a745 !important;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="logo-container">
+  <img src="https://imgvb.com/images/2025/12/09/e6f2d9b2dda3b8bd766a199992ac0b60.png">
+  <div class="store-name">TECI ASOY</div>
+</div>
+
+<!-- POPUP STRUK -->
+<div id="strukPopup">
+  <div class="struk-box">
+    <img class="struk-logo" src="https://imgvb.com/images/2025/12/09/e6f2d9b2dda3b8bd766a199992ac0b60.png">
+    <div class="struk-title">STRUK TECI ASOY</div>
+    <div class="struk-text" id="strukContent"></div>
+
+    <div class="struk-buttons">
+      <button class="btn-struk btn-wa" onclick="kirimWA()">Kirim WA</button>
+      <button class="btn-struk btn-close" onclick="tutupStruk()">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="loadingOverlay"></div>
+
+<div class="container">
+  <h2>Form Order</h2>
+
+  <form id="formOrder">
+    <input type="hidden" id="editUid">
+
+    <div class="form-card">
+      <label>Nama:</label>
+      <input type="text" id="nama" required>
+    </div>
+
+    <div class="form-card">
+      <label>Nomor HP Pelanggan (Wajib):</label>
+      <input type="text" id="nomor" required>
+    </div>
+
+    <div class="form-card">
+      <label>Alamat:</label>
+      <textarea id="alamat" required></textarea>
+    </div>
+
+    <h3>Produk:</h3>
+
+    <div class="product-card">
+      <div class="product-title">
+        <input type="checkbox" id="teci" value="TECI">
+        <span>TECI</span>
+      </div>
+
+      <div class="product-row">
+        <label>Rasa:</label>
+        <select id="rasa_teci">
+          <option value="">Pilih Rasa</option>
+          <option>Original</option>
+          <option>Sambal Kacang</option>
+          <option>Balado</option>
+        </select>
+      </div>
+
+      <div class="product-row">
+        <label>Qty:</label>
+        <input type="number" id="qty_teci" placeholder="Qty">
+      </div>
+
+      <div class="product-row">
+        <label>Harga:</label>
+        <input type="number" id="harga_teci" placeholder="Harga">
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-title">
+        <input type="checkbox" id="es_teh" value="ES TEH">
+        <span>ES TEH</span>
+      </div>
+
+      <div class="product-row">
+        <label>Qty:</label>
+        <input type="number" id="qty_es_teh" placeholder="Qty">
+      </div>
+
+      <div class="product-row">
+        <label>Harga:</label>
+        <input type="number" id="harga_es_teh" placeholder="Harga">
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-title">
+        <input type="checkbox" id="teh_hangat" value="TEH HANGAT">
+        <span>TEH HANGAT</span>
+      </div>
+
+      <div class="product-row">
+        <label>Qty:</label>
+        <input type="number" id="qty_teh_hangat" placeholder="Qty">
+      </div>
+
+      <div class="product-row">
+        <label>Harga:</label>
+        <input type="number" id="harga_teh_hangat" placeholder="Harga">
+      </div>
+    </div>
+
+    <div class="form-card">
+      <label>Catatan:</label>
+      <textarea id="catatan"></textarea>
+    </div>
+
+    <button class="btn btn-submit" type="submit">Kirim Order</button>
+  </form>
+</div>
+
+<!-- HISTORY -->
+<div class="orders-container">
+  <h2>History Order</h2>
+  <div id="history"></div>
+</div>
+
+<script>
+const API = "https://script.google.com/macros/s/AKfycbzygAyn_q9wVFX7XI-QzJX7Kavacwiq3Vfr3RnR606n36gD_OaBE3JB5NtmGf3pb16J8g/exec";
+
+/* === LOADING === */
+function showLoading(text){
+  let b=document.getElementById("loadingOverlay");
+  b.innerHTML=text;
+  b.style.display="flex";
+}
+function hideLoading(){document.getElementById("loadingOverlay").style.display="none";}
+
+/* === FORMAT PRODUK === */
+function formatProduk(text){
+  try{
+    let arr=JSON.parse(text);
+    return arr.map(p=>`- ${p.nama} ${p.rasa?'('+p.rasa+')':''} x${p.qty}`).join("<br>");
+  }catch{return text;}
+}
+
+/* === SUBMIT ORDER === */
+document.getElementById("formOrder").addEventListener("submit", async e=>{
+  e.preventDefault();
+  showLoading("Mengirim order...");
+
+  let produk=[];
+  [["teci","rasa_teci","qty_teci","harga_teci"],
+   ["es_teh",null,"qty_es_teh","harga_es_teh"],
+   ["teh_hangat",null,"qty_teh_hangat","harga_teh_hangat"]]
+  .forEach(p=>{
+    if(document.getElementById(p[0]).checked){
+      produk.push({
+        nama:document.getElementById(p[0]).value,
+        rasa:p[1]?document.getElementById(p[1]).value:"",
+        qty:document.getElementById(p[2]).value
+      });
+    }
+  });
+
+  let data={
+    nama:nama.value,
+    nomor:nomor.value,
+    alamat:alamat.value,
+    produk:produk,
+    catatan:catatan.value,
+    waktu:new Date().toLocaleString()
+  };
+
+  try{
+    let res=await fetch(API,{method:"POST",body:JSON.stringify(data)});
+    let uid=await res.text();
+   buatStruk(data,uid);
+  }catch{
+    alert("Gagal mengirim order");
+  }
+
+  hideLoading();
+  formOrder.reset();
+  loadHistory();
+});
+
+/* === BUAT STRUK === */
+function buatStruk(data, uid){
+  let teksProduk = data.produk.map(
+    p => `• ${p.nama} ${p.rasa?'('+p.rasa+')':''} x${p.qty}`
+  ).join("\n");
+
+  let struk =
+`=========================
+        STRUK TECI ASOY
+=========================
+
+Nama: ${data.nama}
+Nomor: ${data.nomor}
+Alamat: ${data.alamat}
+
+Pesanan:
+${teksProduk}
+
+Catatan:
+${data.catatan || "-"}
+
+Waktu:
+${data.waktu}
+
+Kode Pesanan (UID):
+${uid}
+
+Terima kasih sudah membeli!
+=========================
+`;
+
+  document.getElementById("strukContent").innerText = struk;
+
+  window.__STRUK_TEKS__ = struk;
+  window.__STRUK_WA__ = data.nomor;
+
+  document.getElementById("strukPopup").style.display="flex";
+}
+
+/* === KIRIM WA === */
+function kirimWA(){
+  let nomor = window.__STRUK_WA__;
+  let teks = encodeURIComponent(window.__STRUK_TEKS__);
+  window.open(`https://wa.me/${nomor}?text=${teks}`, "_blank");
+}
+
+/* === TUTUP STRUK === */
+function tutupStruk(){
+  document.getElementById("strukPopup").style.display="none";
+}
+
+/* === DONE === */
+async function setDone(uid){
+  showLoading("Menandai selesai...");
+  await fetch(`${API}?statusUid=${uid}`);
+  hideLoading();
+  loadHistory();
+}
+
+/* === DELETE === */
+async function deleteOrder(uid){
+  showLoading("Menghapus order...");
+  await fetch(`${API}?deleteUid=${uid}`);
+  hideLoading();
+  loadHistory();
+}
+
+/* === EDIT === */
+function editOrder(o){
+  showLoading("Memuat data...");
+
+  document.getElementById("editUid").value = o.uid;
+
+  nama.value = o.nama;
+  nomor.value = o.nomor;
+  alamat.value = o.alamat;
+  catatan.value = o.catatan;
+
+  ["teci","es_teh","teh_hangat"].forEach(id=>{
+    document.getElementById(id).checked = false;
+  });
+
+  try{
+    let produk = JSON.parse(o.produk);
+    produk.forEach(p=>{
+      let id = p.nama.toLowerCase().replace(" ","_");
+      document.getElementById(id).checked = true;
+      document.getElementById("qty_"+id).value = p.qty;
+      document.getElementById("harga_"+id).value = p.harga;
+      if(p.rasa) document.getElementById("rasa_"+id).value = p.rasa;
+    });
+  }catch{}
+
+  hideLoading();
+  scrollTo({top:0, behavior:"smooth"});
+}
+
+/* === HISTORY === */
+async function loadHistory(){
+  let res = await fetch(API);
+  let data = await res.json();
+  let html="";
+
+  data.reverse().forEach(o=>{
+    html += `
+      <div class="order-item ${o.status=='done'?'order-done':''}">
+        <p><b>Nama:</b> ${o.nama}</p>
+        <p><b>Nomor:</b> ${o.nomor}</p>
+        <p><b>Alamat:</b> ${o.alamat}</p>
+        <p><b>Produk:</b><br>${formatProduk(o.produk)}</p>
+        <p><b>Catatan:</b> ${o.catatan}</p>
+        <p><b>Waktu:</b> ${o.waktu}</p>
+
+        <button class="btn btn-done" onclick="setDone('${o.uid}')">Done</button>
+        <button class="btn btn-edit" onclick='editOrder(${JSON.stringify(o).replace(/"/g,"&quot;")})'>Edit</button>
+        <button class="btn btn-delete" onclick="deleteOrder('${o.uid}')">Hapus</button>
+      </div>
+    `;
+  });
+
+  document.getElementById("history").innerHTML = html;
+}
+loadHistory();
+</script>
+
+</body>
+</html>
